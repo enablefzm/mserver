@@ -20,6 +20,23 @@ var AuthApiGroup *gin.RouterGroup
 
 func init() {
 	ObServer = gin.Default()
+	// 初始化Gin的用户认证中间件
+	authMiddleware, err := middlewares.InitMiddlewares(ObServer)
+	if err != nil {
+		log.Println("加载授权中间件出错:", err.Error())
+		panic("加载授权中间件出错!")
+	}
+	// 设定登入路由处理Handler
+	ObServer.POST("/auth/login", authMiddleware.LoginHandler)
+	// 指定路由组
+	AuthApiGroup = ObServer.Group("/api")
+	// 使用用户认证中间件
+	AuthApiGroup.Use(authMiddleware.MiddlewareFunc())
+	// 刷新当前的Token
+	AuthApiGroup.GET("/refresh_token", authMiddleware.RefreshHandler)
+
+	// 初始化路由
+	routers.Init(AuthApiGroup)
 }
 
 // 运行服务端
@@ -39,22 +56,7 @@ func Run(cfg *ServerCfg, dbCfg *dbs.Cfg) {
 		// 初始化Casbin权限认证机制
 		AuthApiGroup.Use(middlewares.CasbinMiddleWare)
 	}
-	// 初始化Gin的用户认证中间件
-	authMiddleware, err := middlewares.InitMiddlewares(ObServer)
-	if err != nil {
-		log.Println("加载授权中间件出错:", err.Error())
-		panic("加载授权中间件出错!")
-	}
-	// 设定登入路由处理Handler
-	ObServer.POST("/auth/login", authMiddleware.LoginHandler)
-	// 指定路由组
-	AuthApiGroup = ObServer.Group("/api")
-	// 使用用户认证中间件
-	AuthApiGroup.Use(authMiddleware.MiddlewareFunc())
-	// 刷新当前的Token
-	AuthApiGroup.GET("/refresh_token", authMiddleware.RefreshHandler)
-	// 初始化路由
-	routers.Init(AuthApiGroup)
+
 	log.Println("运行MServer Web服务端...")
 	ObServer.Run(":" + cfg.Port)
 }
