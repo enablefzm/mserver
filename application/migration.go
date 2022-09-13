@@ -37,7 +37,7 @@ func MigrationAdmin(udb *userdtos.CreateUpdateUserDto, dst ...interface{}) error
 	}
 	// 创建root角色对象，如果存在则不在创建
 	if errCreate := userapps.AppUser.Create(*udb); errCreate != nil {
-		log.Println("创建角色数据出错:", err.Error())
+		log.Println("创建角色数据出错:", errCreate.Error())
 	}
 	// 创建其它表
 	err = dbs.ObDB.AutoMigrate(dst...)
