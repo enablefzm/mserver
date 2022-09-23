@@ -11,7 +11,7 @@ var ObDB *gorm.DB
 
 func LinkDb(c *Cfg) error {
 	var err error
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true&loc=Local",
 		c.User,
 		c.Password,
 		c.IpAddress,
